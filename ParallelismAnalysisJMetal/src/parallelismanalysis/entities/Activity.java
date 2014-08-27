@@ -14,14 +14,16 @@ import parallelismanalysis.entities.patterns.ParallelPipeline;
 import parallelismanalysis.entities.patterns.PeriodicTaskParallelism;
 import parallelismanalysis.entities.patterns.TaskParallelism;
 
-/** Basic Activity entity, either a sequential piece of code or a PDP */
+/**
+ * Basic Activity entity, either a sequential piece of code or a PDP
+ */
 public class Activity implements ConsistentElement {
 
     public final static String XML_NODE_NAME = "activity";
     public String title;
     public int weight = 0;
     public String OID;
-    
+
     private HashSet<String> globals = null;
 
     public Activity(String title, int weight) {
@@ -112,7 +114,6 @@ public class Activity implements ConsistentElement {
          } else {
          System.out.print("PAR " + par + " SEQ " + seq + " S " + speedup_max);
          } */
-
         System.out.println("");
     }
 
@@ -194,54 +195,59 @@ public class Activity implements ConsistentElement {
         }
     }
 
+    private static boolean no_vars = false;
+
     public HashSet<String> getGlobals() {
         if (globals == null) {
             HashSet<String> result = new HashSet<>();
 
-            File file = new File("1-Alle Tasks mit einmaligen Variablen.txt");
+            File file = new File("CrawlerCraneVariables.txt");
 
             BufferedReader br = null;
 
-            try {
-                int i = 0;
-                String readLine;
-                br = new BufferedReader(new FileReader(file));
-
-                while ((readLine = br.readLine()) != null) {
-                    boolean skipline = false;
-                    if (i == 0 && readLine.contains("Funktion: " + this.title)) {
-                        i = 1;
-                    }
-                    if (i == 1 && readLine.contains("evtl. angesprochene globale Variablen:")) {
-                        i = 2;
-                        skipline = true;
-                    }
-                    if (i == 2 && readLine.trim().isEmpty()) {
-                        i = 0;
-                    }
-
-                    if (i == 2 && !skipline) {
-                        String var = readLine.trim();
-                        var = var.replace(",rw", "");
-                        var = var.replace(",r", "");
-                        var = var.replace(",w", "");
-                        result.add(var);
-                        // System.out.println("Variable gefunden: " + var);
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
+            if (!no_vars) {
                 try {
-                    if (br != null) {
-                        br.close();
+                    int i = 0;
+                    String readLine;
+                    br = new BufferedReader(new FileReader(file));
+
+                    while ((readLine = br.readLine()) != null) {
+                        boolean skipline = false;
+                        if (i == 0 && readLine.contains("Funktion: " + this.title)) {
+                            i = 1;
+                        }
+                        if (i == 1 && readLine.contains("evtl. angesprochene globale Variablen:")) {
+                            i = 2;
+                            skipline = true;
+                        }
+                        if (i == 2 && readLine.trim().isEmpty()) {
+                            i = 0;
+                        }
+
+                        if (i == 2 && !skipline) {
+                            String var = readLine.trim();
+                            var = var.replace(",rw", "");
+                            var = var.replace(",r", "");
+                            var = var.replace(",w", "");
+                            result.add(var);
+                            // System.out.println("Variable gefunden: " + var);
+                        }
                     }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    no_vars = true;
+                } finally {
+                    try {
+                        if (br != null) {
+                            br.close();
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
             globals = result;
-            
+
             // System.out.println(globals.size() + " globals calculated.");
         }
 
@@ -253,32 +259,31 @@ public class Activity implements ConsistentElement {
 
         return result;
     }
-    
+
     public int countSyncGlobalAccesses(HashSet<String> all_globals) throws ObjectiveException {
         HashSet<String> my_globals = this.getGlobals();
-        
+
         int result = 0;
-        
-        for(String var : all_globals) {
-            if(my_globals.contains(var)) result++;
+
+        for (String var : all_globals) {
+            if (my_globals.contains(var)) {
+                result++;
+            }
         }
-        
+
         return result;
-        
+
         // System.out.println("All globals: " + globals);
         // System.out.println("My globals: " + my_globals);
-        
         // my_globals.retainAll(all_globals);
-        
         // System.out.println("Intersection: " + my_globals);
         // System.out.println("Acccessed globals for " + this + " is " + my_globals.size() + " (" + my_globals + ")");
-        
         // return my_globals.size();
     }
 
     /* public HashSet<String> getSyncGlobalsAccesses() throws ObjectiveException {
-        HashSet<String> result = new HashSet<>();
+     HashSet<String> result = new HashSet<>();
 
-        return result;
-    } */
+     return result;
+     } */
 }

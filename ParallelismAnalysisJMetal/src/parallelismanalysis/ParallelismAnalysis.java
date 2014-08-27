@@ -31,9 +31,7 @@ public class ParallelismAnalysis {
     public static void main(String[] args) {
         try {
             ActivityPatternDiagram apd = new ActivityPatternDiagram(
-                    new File(
-                            "MC128_MOET_ACET.xml" // "D:/svn_ginkgo/parmerasa_privat/Tools/ParallelismAnalysis/UAV_PMAM.xml" // "D:/svn_ginkgo/parmerasa_privat/Tools/ParallelismAnalysis/UAV_64s.xml"
-                    )
+                    new File("CrawlerCrane.xml")
             );
 
             // ######################################################
@@ -125,9 +123,9 @@ public class ParallelismAnalysis {
                     vars[i] = (int) Math.round(foo.variables[i]);
                 }
                 
-                bar.evaluate();
-
                 bar.setParameterValues(vars);
+                
+                bar.evaluate();
 
                 bar.printDetails();
             }
