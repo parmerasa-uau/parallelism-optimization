@@ -1,0 +1,68 @@
+<activity_pattern_diagram name="UAV">
+	<task_parallelism name="Initialize">
+		<activity name="Init LIDAR" weight="150" />
+		<activity name="Init GPS" weight="200" />
+		<activity name="Init Navigation" weight="50" />
+		<activity name="Init AHRS" weight="100" />
+	</task_parallelism>
+	<periodic_task_parallelism name="Fly to goal" iterations="58">
+		<activity name="Update position" weight="10" period="1000" />
+		<parallel_pipeline name="Navigate and fly" period="1000" iterations="1">
+			<activity name="Extend obstacle map" weight="100" />
+			<activity_pattern_diagram name="Build weightmap">
+				<activity name="Initialize weightmap" weight="10" />
+				<activity name="Calculate Sectors" weight="2" />
+				<parallel_pipeline name="Propagate Weights" iterations="64">
+					<activity_pattern_diagram name="Pipeline Stufe 1">
+						<activity name="Propagate sector 000" weight="33"/>
+						<task_parallelism name="Propagate sectors #1">
+							<activity name="Propagate sector 100" weight="33"/>
+							<activity name="Propagate sector 010" weight="33"/>
+							<activity name="Propagate sector 001" weight="33"/>
+						</task_parallelism>
+					</activity_pattern_diagram>
+					<activity_pattern_diagram name="Pipeline Stufe 2">
+						<task_parallelism name="Propagate sectors #2">
+							<activity name="Propagate sector 110" weight="33"/>
+							<activity name="Propagate sector 011" weight="33"/>
+							<activity name="Propagate sector 101" weight="33"/>
+							<activity name="Propagate sector 200" weight="33"/>
+							<activity name="Propagate sector 020" weight="33"/>
+							<activity name="Propagate sector 002" weight="33"/>
+						</task_parallelism>
+						<task_parallelism name="Propagate sectors #3">
+							<activity name="Propagate sector 111" weight="33"/>
+							<activity name="Propagate sector 210" weight="33"/>
+							<activity name="Propagate sector 201" weight="33"/>
+							<activity name="Propagate sector 102" weight="33"/>
+							<activity name="Propagate sector 120" weight="33"/>
+							<activity name="Propagate sector 012" weight="33"/>
+							<activity name="Propagate sector 021" weight="33"/>
+						</task_parallelism>
+					</activity_pattern_diagram>
+					<activity_pattern_diagram name="Pipeline Stufe 3">
+						<task_parallelism name="Propagate sectors #4">
+							<activity name="Propagate sector 202" weight="33"/>
+							<activity name="Propagate sector 022" weight="33"/>
+							<activity name="Propagate sector 220" weight="33"/>
+							<activity name="Propagate sector 211" weight="33"/>
+							<activity name="Propagate sector 121" weight="33"/>
+							<activity name="Propagate sector 112" weight="33"/>
+						</task_parallelism>
+						<task_parallelism name="Propagate sectors #5">
+							<activity name="Propagate sector 212" weight="33"/>
+							<activity name="Propagate sector 122" weight="33"/>
+							<activity name="Propagate sector 221" weight="33"/>
+						</task_parallelism>
+					</activity_pattern_diagram>
+					<activity_pattern_diagram name="Pipeline Stufe 4">
+						<activity name="Propagate sector 222" weight="33"/>
+					</activity_pattern_diagram>
+				</parallel_pipeline>
+			</activity_pattern_diagram>
+			<activity name="Find Waypoints" weight="20" />
+			<activity name="Update Course" weight="5" />
+			<activity name="Fly to Waypoint" weight="10" />
+		</parallel_pipeline>
+	</periodic_task_parallelism>
+</activity_pattern_diagram>
